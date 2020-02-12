@@ -40,14 +40,36 @@ def checkString(arr,col):
     flag = False
     for i in range(len(arr)):
         thing = arr[i][col]
-        if thing and isinstance(thing,str):
+        if isinstance(thing,str):
             flag = True
             strings.append(thing)
         else:
             nums.append(thing)
     if flag:
-        return [np.unique(strings),np.unique(nums)]
+        return [np.unique(strings).tolist(),np.unique(nums).tolist()]
     return None 
+
+def genDict(strings, ints):
+    count = 0
+    enum = {}
+    while len(strings):
+        if not count in ints:
+            enum[strings[0]] = count
+            strings.pop(0)
+        count = count + 1
+    return enum
+
+def adjust(arr,col,enum):
+    for i in range(len(arr)):
+        if isinstance(arr[i][col],str):
+            arr[i][col] = enum[arr[i][col]]
+
+def enumerateStrings(arr):
+    for col in range(len(arr[0])):
+        check = checkString(arr,col)
+        if not check is None:
+            enum = genDict(check[0],check[1])
+            check = checkString(arr,col)
 
 data = readCsv('../Data/train.csv')
 data = removeHeader(data)
@@ -55,10 +77,7 @@ data = deleteNCols(data,1)
 out = separateCol(data,-1)
 data = out[0]
 classes = firstColVector(out[1])
-for col in range(len(data[0])):
-    check = checkString(data,col)
-    if not check is None:
-        print(col,check[0],check[1])
+enumerateStrings(data)
 sys.exit()
 
 neigh = KNeighborsClassifier(n_neighbors=10)
