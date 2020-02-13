@@ -4,6 +4,18 @@ import numpy as np
 import sys
 import timeit
 
+###############################################################
+## Converts a string to a number, if possible. If the string 
+## is an integer, it will be converted to an integer, if it is 
+## a float it will be converted to a float, and if it is 
+## neither it will be left as a string.
+##
+## Parameters: string - the string to be converted
+##
+## Returns - The input string as a string or number, depending 
+##           on what it really is
+###############################################################
+
 def convertStoI(string):
     try:
         return int(string)
@@ -14,6 +26,15 @@ def convertStoI(string):
     except:
         return string
 
+###############################################################
+## Reads a .csv file, converting strings to numbers where 
+## possible
+##
+## Parameters: path - the filepath of the CSV to be read
+##
+## Returns - The CSV as a list of lists
+###############################################################
+
 def readCsv(path):
     completeCsv = []
     with open(path) as csvFile:
@@ -22,18 +43,73 @@ def readCsv(path):
             completeCsv.append([convertStoI(thing) for thing in row])
     return completeCsv
 
+###############################################################
+## Remove the first row of an array (list of lists)
+##
+## Parameters: arr - the array to delete the header of
+##
+## Returns - The original array without the header (first row)
+###############################################################
+
 def removeHeader(arr):
     return arr[1:]
+
+###############################################################
+## Separates an array by columns into two blocks. All the data 
+## will be included in one of the two parts, and none will be 
+## duplicated.
+##
+## Parameters: arr - the array to be split
+##             col - the first column to be included in the 
+##                   right part
+##
+## Returns - A list with two elements. The first element is 
+##           the left part of the array, and the second element 
+##           is the right part of the array
+###############################################################
 
 def separateCol(arr,col):
     n = len(arr)
     return [[arr[i][:col] for i in range(n)], [arr[i][col:] for i in range(n)]]
 
+###############################################################
+## Deletes the first few columns of an array
+##
+## Parameters: arr - the array to delete columns from
+##             col - the number of rows to be deleted
+##
+## Returns - A copy of the array with the first "col" columns 
+##           deleted
+###############################################################
+
 def deleteNCols(arr,col):
     return [arr[i][col:] for i in range(len(arr))]
 
+###############################################################
+## Creates a vector from the first column of an array
+##
+## Parameters: arr - the array to create the vector from
+##
+## Returns - The elements of the first column of the array as a 
+##           list
+###############################################################
+
 def firstColVector(arr):
     return [arr[i][0] for i in range(len(arr))]
+
+###############################################################
+## Checks if there are strings in a specified column of an 
+## array
+##
+## Parameters: arr - the array to be checked for strings
+##             col - the column to be checked
+##
+## Returns - If there are strings in the column, this returns a 
+##           list of two lists. The first list is a list of the 
+##           unique strings in the column, and the second is a 
+##           list of the unique numbers in the list. If there 
+##           are no strings in the column, this returns None.
+###############################################################
 
 def checkString(arr,col):
     strings = []
@@ -50,6 +126,18 @@ def checkString(arr,col):
         return [np.unique(strings).tolist(),np.unique(nums).tolist()]
     return None 
 
+###############################################################
+## Takes a set of strings and enumerates them, avoiding certain
+## values
+##
+## Parameters: strings - a list of strings to be enumerated
+##             ints - a list of disallowed integers
+##
+## Returns - A dictionary whose keys are the input strings and 
+##           whose values are unique integers, none of which 
+##           are contained in the list of integers.
+###############################################################
+
 def genDict(strings, ints):
     count = 0
     enum = {}
@@ -60,10 +148,32 @@ def genDict(strings, ints):
         count = count + 1
     return enum
 
+###############################################################
+## Converts all the strings in a specified column to integers 
+## based on a given enumeration of those strings
+##
+## Parameters: arr - the array to be converted
+##             col - the column to be converted 
+##             enum - an enumeration of the strings in the column
+##
+## Returns - None - the conversion is done in place
+###############################################################
+
 def adjust(arr,col,enum):
     for i in range(len(arr)):
         if isinstance(arr[i][col],str):
             arr[i][col] = enum[arr[i][col]]
+
+###############################################################
+## Iterates through the columns of an array, converting strings 
+## to integers and ensuring that the strings in a column are 
+## converted to a number that is not already present in that 
+## column
+##
+## Parameters: arr - the array to be converted
+##
+## Returns - None - the conversion is done in place
+###############################################################
 
 def enumerateStrings(arr):
     for col in range(len(arr[0])):
