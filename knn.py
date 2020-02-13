@@ -2,6 +2,7 @@ from sklearn.neighbors import KNeighborsClassifier
 import csv
 import numpy as np
 import sys
+import timeit
 
 def convertStoI(string):
     try:
@@ -69,7 +70,7 @@ def enumerateStrings(arr):
         check = checkString(arr,col)
         if not check is None:
             enum = genDict(check[0],check[1])
-            check = checkString(arr,col)
+            adjust(data,col,enum)
 
 data = readCsv('../Data/train.csv')
 data = removeHeader(data)
@@ -78,7 +79,10 @@ out = separateCol(data,-1)
 data = out[0]
 classes = firstColVector(out[1])
 enumerateStrings(data)
-sys.exit()
 
+start = timeit.default_timer()
 neigh = KNeighborsClassifier(n_neighbors=10)
 neigh.fit(data,classes)
+end = timeit.default_timer()
+
+print("Run time: ",end-start)
