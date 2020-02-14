@@ -3,6 +3,13 @@ import csv
 import numpy as np
 import sys
 import timeit
+import random
+
+###############################################################
+## A class to hold the enumeration of the string values in a 
+## column (as a dictionary) and the integer values in the 
+## same column (as a list)
+###############################################################
 
 class CompleteEnum:
     enum = {}
@@ -50,6 +57,21 @@ def readCsv(path):
         for row in reader:
             completeCsv.append([convertStoI(thing) for thing in row])
     return completeCsv
+
+###############################################################
+## Writes a .csv file
+##
+## Parameters: path - the filepath of the CSV to be written
+##             arr - the data to be written to the file
+##
+## Returns: None
+###############################################################
+
+def writeCsv(path,arr):
+    with open(path,'w') as csvFile:
+        writer = csv.writer(csvFile, delimiter=',')
+        for row in arr:
+            writer.writerow(row)
 
 ###############################################################
 ## Remove the first row of an array (list of lists)
@@ -104,6 +126,21 @@ def deleteNCols(arr,col):
 
 def firstColVector(arr):
     return [arr[i][0] for i in range(len(arr))]
+
+###############################################################
+## Splits a dataset into training and test data by a split of 
+## roughly 75-25
+##
+## Parameters: data - the data to be split
+## 
+## Returns: A list of lists - [trainData, testData]
+###############################################################
+
+def splitSamples(data):
+    random.shuffle(data)
+    length = len(data)
+    cutoff = int(0.2*length*random.random()+0.74*length)
+    return [data[:cutoff],data[cutoff:]]
 
 ###############################################################
 ## Checks if there are strings in a specified column of an 
@@ -230,7 +267,6 @@ def enumerateTestData(arr,enums):
 
 def augmentEnumeration(arr,col,completeEnum):
     check = checkString(arr,col)
-    print(col)
     if not check is None:
         strings = [thing for thing in check[0] if not thing in completeEnum.enum.keys()]
         ints = completeEnum.ints + list(completeEnum.enum.values())
@@ -238,26 +274,37 @@ def augmentEnumeration(arr,col,completeEnum):
         enum.update(completeEnum.enum)
     else:
         enum = completeEnum.enum
-    print(completeEnum.enum)
-    print(enum)
     return enum
 
 data = readCsv('../Data/train.csv')
+header = data[0]
 data = removeHeader(data)
+ids = [row[0] for row in data]
 data = deleteNCols(data,1)
-out = separateCol(data,-1)
-data = out[0]
-classes = firstColVector(out[1])
 completeEnums = enumerateStrings(data)
+writeCsv('../Data/train_numeric.csv',data)
+
+out = splitSamples(data)
+trainData = out[0]
+testData = out[1]
+
+out = separateCol(trainData,-1)
+trainData = out[0]
+trainClasses = firstColVector(out[1])
+
+out = separateCol(testData,-1)
+testData = out[0]
+testClasses = firstColVector(out[1])
 
 start = timeit.default_timer()
 neigh = KNeighborsClassifier(n_neighbors=10)
-neigh.fit(data,classes)
+neigh.fit(trainData,trainClasses)
 end = timeit.default_timer()
 
 print("Run time: ",end-start)
 
-testData = readCsv('../Data/test.csv')
-testData = removeHeader(testData)
-testData = deleteNCols(testData,1)
-enumerateTestData(testData,completeEnums)
+test = readCsv('../Data/test.csv')
+test = removeHeader(test)
+test = deleteNCols(test,1)
+enumerateTestData(test,completeEnums)
+writeCsv('../Data/test_numeric.csv',test)
