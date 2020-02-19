@@ -4,6 +4,11 @@ import numpy as np
 import sys
 import timeit
 import random
+import matplotlib.pyplot as plt
+
+def writeFile(path,string):
+    with open(path,"w") as f:
+        f.write(string)
 
 def zeroPad(string,length):
     copy = string
@@ -352,23 +357,27 @@ testData = out[0]
 testClasses = firstColVector(out[1])
 print("Separation time: ", timeit.default_timer()-start)
 
-start = timeit.default_timer()
-neigh = KNeighborsClassifier(n_neighbors=10)
-neigh.fit(trainData,trainClasses)
-print("Training time: ",timeit.default_timer()-start)
-
-ks = [1,2,3,4,6,8,10,15,20,30,40,50,75,100,200,400,700,100]
+ks = [1,2,3,4,6,8,10,15,20,30,40,50,75,100,200,400,700,1000]
 tables = {}
-for k in [1,2,3,4,6,8,10,15,20,30,40,50,75,100,200,400,700,100]:
+for k in [1,2,3,4,6,8,10,15,20,30,40,50,75,100,200,400,700,1000]:
     tables[k] = Table()
     print("k=",k)
     start = timeit.default_timer()
+    neigh = KNeighborsClassifier(n_neighbors=k)
+    neigh.fit(trainData,trainClasses)
+    print("Training time for k=",k,": ",timeit.default_timer()-start)
+
+    start = timeit.default_timer()
     for i in range(len(testData)):
-        if not i%250+1:
+        if not i%250-1:
             print("Classifying observation number: ",i)
         tables[k].addObs(testClasses[i],neigh.predict([testData[i]])[0])
 
-    print(str(table))
+    print(str(tables[k]))
     print("Predicting time for k=", k,": ",timeit.default_timer()-start)
+    writeFile("../Output/knn_"+str(k),str(tables[k]))
+
+plt.plot(ks,[tables[k].accuracy() for k in ks],'r-')
+plt.show()
 
 #test = readCsv('../Data/test_numeric.csv')
