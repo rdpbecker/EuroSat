@@ -5,6 +5,15 @@ import sys
 import timeit
 import random
 
+def zeroPad(string,length):
+    copy = string
+    while len(copy) < length:
+        if len(copy)%2:
+            copy = copy + " "
+        else:
+            copy = " " + copy
+    return copy
+
 ###############################################################
 ## A class to hold the enumeration of the string values in a 
 ## column (as a dictionary) and the integer values in the 
@@ -18,6 +27,50 @@ class CompleteEnum:
     def __init__(self,enum,ints):
         self.enum = enum
         self.ints = ints
+
+class Table:
+    pp = 0
+    np = 0
+    pn = 0
+    nn = 0
+
+    def __init__(self):
+        pass
+
+    def addObs(self,actual,classified):
+        if not actual in [0,1] or not classified in [0,1]:
+            print("Invalid argument: ", actual, ",", classifier,")")
+            return
+        test = (actual,classified)
+        if test == (0,0):
+            self.nn = self.nn + 1
+        elif test == (1,0):
+            self.pn = self.pn + 1
+        elif test == (0,1):
+            self.np = self.np + 1
+        elif test == (1,1):
+            self.pp = self.pp + 1
+
+    def specificity(self):
+        return float(self.nn)/(self.np+self.nn)
+
+    def sensitivity(self):
+        return float(self.pp)/(self.pp+self.pn)
+
+    def fScore(self):
+        return 2*float(self.nn)/(self.np+self.pn+2*self.nn)
+
+    def __str__(self):
+        length = max([len(str(i)) for i in [self.pp,self.nn,self.np,self.pn]])
+        string = "    |Pr +|Pr -|\n"
+        string = string + "-"*(6+2*length)+"\n"
+        string = string + "Tr +|" + zeroPad(str(self.pp),length) + "|" + zeroPad(str(self.pn),length) + "\n"
+        string = string + "-"*(6+2*length)+"\n"
+        string = string + "Tr -|" + zeroPad(str(self.np),length) + "|" + zeroPad(str(self.nn),length) + "\n\n"
+        string = string + "Sensitivity: " + str(self.sensitivity()) + "\n"
+        string = string + "Specificity: " + str(self.specificity()) + "\n"
+        string = string + "F: " + str(self.fScore()) + "\n"
+        return string
 
 ###############################################################
 ## Converts a string to a number, if possible. If the string 
@@ -277,8 +330,11 @@ def augmentEnumeration(arr,col,completeEnum):
         enum = completeEnum.enum
     return enum
 
+start = timeit.default_timer()
 data = readCsv('../Data/train_numeric.csv')
+print("Reading time: ", timeit.default_timer()-start)
 
+start = timeit.default_timer()
 out = splitSamples(data)
 trainData = out[0]
 testData = out[1]
@@ -290,12 +346,24 @@ trainClasses = firstColVector(out[1])
 out = separateCol(testData,-1)
 testData = out[0]
 testClasses = firstColVector(out[1])
+print("Separation time: ", timeit.default_timer()-start)
 
 start = timeit.default_timer()
 neigh = KNeighborsClassifier(n_neighbors=10)
 neigh.fit(trainData,trainClasses)
-end = timeit.default_timer()
+print("Training time: ",timeit.default_timer()-start)
 
-print("Run time: ",end-start)
+ks = [1,2,3,4,6,8,10,15,20,30,40,50,75,100,200,400,700,100]
+tables = {}
+for k in [1,2,3,4,6,8,10,15,20,30,40,50,75,100,200,400,700,100]:
+    tables[k] = Table()
+    start = timeit.default_timer()
+    for i in range(len(testData)):
+        if not i%250+1:
+            print("Classifying observation number: ",i)
+        table.addObs(testClasses[i],neigh.predict([testData[i]])[0])
+
+    print(str(table))
+    print("Predicting time for k=", k,": ",timeit.default_timer()-start)
 
 #test = readCsv('../Data/test_numeric.csv')
