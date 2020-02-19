@@ -277,13 +277,7 @@ def augmentEnumeration(arr,col,completeEnum):
         enum = completeEnum.enum
     return enum
 
-data = readCsv('../Data/train.csv')
-header = data[0]
-data = removeHeader(data)
-ids = [row[0] for row in data]
-data = deleteNCols(data,1)
-completeEnums = enumerateStrings(data)
-writeCsv('../Data/train_numeric.csv',data)
+data = readCsv('../Data/train_numeric.csv')
 
 out = splitSamples(data)
 trainData = out[0]
@@ -304,8 +298,4 @@ end = timeit.default_timer()
 
 print("Run time: ",end-start)
 
-test = readCsv('../Data/test.csv')
-test = removeHeader(test)
-test = deleteNCols(test,1)
-enumerateTestData(test,completeEnums)
-writeCsv('../Data/test_numeric.csv',test)
+#test = readCsv('../Data/test_numeric.csv')
