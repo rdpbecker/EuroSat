@@ -137,6 +137,7 @@ def firstColVector(arr):
 ###############################################################
 
 def splitSamples(data):
+    random.seed(1)
     random.shuffle(data)
     length = len(data)
     cutoff = int(0.2*length*random.random()+0.74*length)
