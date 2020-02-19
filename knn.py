@@ -60,6 +60,9 @@ class Table:
     def fScore(self):
         return 2*float(self.nn)/(self.np+self.pn+2*self.nn)
 
+    def accuracy(self):
+        return float(self.nn+self.pp)/(self.np+self.nn+self.pp+self.pn)
+
     def __str__(self):
         length = max([len(str(i)) for i in [self.pp,self.nn,self.np,self.pn]])
         string = "    |Pr +|Pr -|\n"
@@ -70,6 +73,7 @@ class Table:
         string = string + "Sensitivity: " + str(self.sensitivity()) + "\n"
         string = string + "Specificity: " + str(self.specificity()) + "\n"
         string = string + "F: " + str(self.fScore()) + "\n"
+        string = string + "Accuracy: " + str(self.accuracy()) + "\n"
         return string
 
 ###############################################################
@@ -357,11 +361,12 @@ ks = [1,2,3,4,6,8,10,15,20,30,40,50,75,100,200,400,700,100]
 tables = {}
 for k in [1,2,3,4,6,8,10,15,20,30,40,50,75,100,200,400,700,100]:
     tables[k] = Table()
+    print("k=",k)
     start = timeit.default_timer()
     for i in range(len(testData)):
         if not i%250+1:
             print("Classifying observation number: ",i)
-        table.addObs(testClasses[i],neigh.predict([testData[i]])[0])
+        tables[k].addObs(testClasses[i],neigh.predict([testData[i]])[0])
 
     print(str(table))
     print("Predicting time for k=", k,": ",timeit.default_timer()-start)
