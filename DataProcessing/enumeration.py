@@ -1,7 +1,7 @@
 import sys
 sys.path.append("../Classes")
 import numpy as np
-import CompleteEnum from CompleteEnum
+from CompleteEnum import CompleteEnum
 
 ###############################################################
 ## Checks if there are strings in a specified column of an 
@@ -96,11 +96,43 @@ def enumerateStrings(arr):
     return completeEnums
 
 ###############################################################
-## Enumerate the test data using the same enumerations as for 
+## Enumerate the test data using the same enumerations as for
 ## the training data.
 ##
 ## Parameters: arr - the array to be enumerated
 ##             enums - the enumerations used for the training
 ##                     data
 ##
+## Returns: None - the conversion is done in place.
+###############################################################
 
+def enumerateTestData(arr,enums):
+    for col in enums.keys():
+        enum = augmentEnumeration(arr,col,enums[col])
+        adjust(arr,col,enum)
+
+###############################################################
+## Augment the original enumeration for the test data to catch
+## the cases where there are unseen non-numeric entries in the
+## test set
+##
+## Parameter: arr - the set of test data
+##            col - the column to be changed
+##            completeEnum - the completeEnum object for the
+##                           column
+##
+## Returns: a dictionary with the enumeration for all the
+##          string values, which is an augmentation of the
+##          original enumeration
+##############################################################
+
+def augmentEnumeration(arr,col,completeEnum):
+    check = checkString(arr,col)
+    if not check is None:
+        strings = [thing for thing in check[0] if not thing in completeEnum.enum.keys()]
+        ints = completeEnum.ints + list(completeEnum.enum.values())
+        enum = genDict(strings,ints)
+        enum.update(completeEnum.enum)
+    else:
+        enum = completeEnum.enum
+    return enum
