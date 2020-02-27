@@ -25,7 +25,7 @@ classes = dataManip.firstColVector(out[1])
 print("Separation time: ", timeit.default_timer()-start)
 
 start = timeit.default_timer()
-bayes = CategoricalNB()
+bayes = CategoricalNB(alpha=0.001)
 bayes.fit(data,classes)
 print("Training time: ",timeit.default_timer()-start)
 
@@ -35,4 +35,4 @@ for i in range(len(testData)):
     output.append([ids[i],bayes.predict([data[i]])[0]])
 
 print("Predicting time: ",timeit.default_timer()-start)
-fileio.writeCsv("../Output/bayes.csv",output)
+fileio.writeCsv("../Output/bayes_0.001.csv",output)

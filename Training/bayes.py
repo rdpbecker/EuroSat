@@ -33,13 +33,13 @@ def main():
     testClasses = firstColVector(out[1])
     print("Separation time: ", timeit.default_timer()-start)
     
-    ks = [0.001,0.01,0.1,1,10,100]
+    ks = [0,0.001,0.01,0.1,1,10,100]
     tables = {}
     for k in ks:
         tables[k] = Table()
         print("k=",k)
         start = timeit.default_timer()
-        bayes = CategoricalNB()
+        bayes = CategoricalNB(alpha=k)
         bayes.fit(trainData,trainClasses)
         print("Training time for k=",k,": ",timeit.default_timer()-start)
     
