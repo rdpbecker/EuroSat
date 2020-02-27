@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 def main():
     start = timeit.default_timer()
-    data = readCsv('../Data/Training/train_numeric.csv')
+    data = readCsv('../Data/Training/train_processed.csv')
     print("Reading time: ", timeit.default_timer()-start)
     
     start = timeit.default_timer()
