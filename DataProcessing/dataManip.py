@@ -42,6 +42,9 @@ def separateCol(arr,col):
 def deleteNCols(arr,col):
     return [arr[i][col:] for i in range(len(arr))]
 
+def deleteL(arr):
+    return deleteNCols(removeHeader(arr),1)
+
 ###############################################################
 ## Creates a vector from the first column of an array
 ##

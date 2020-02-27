@@ -26,6 +26,17 @@ def convertStoI(string):
     except:
         return string
 
+def convertStoINerf(string):
+    try:
+        return int(string)
+    except:
+        pass
+    try: 
+        x = float(string)
+        return 123456
+    except:
+        return string
+
 ###############################################################
 ## Reads a .csv file, converting strings to numbers where 
 ## possible
@@ -35,12 +46,16 @@ def convertStoI(string):
 ## Returns - The CSV as a list of lists
 ###############################################################
 
-def readCsv(path):
+def readCsv(path,nerf=False):
     completeCsv = []
+    if nerf:
+        converter = convertStoINerf
+    else:
+        converter = convertStoI
     with open(path) as csvFile:
         reader = csv.reader(csvFile, delimiter=',')
         for row in reader:
-            completeCsv.append([convertStoI(thing) for thing in row])
+            completeCsv.append([converter(thing) for thing in row])
     return completeCsv
 
 ###############################################################
