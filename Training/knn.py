@@ -14,6 +14,8 @@ def main():
     data = readCsv('../Data/Training/train_processed.csv')
     print("Reading time: ", timeit.default_timer()-start)
     
+    data = deleteL(data)
+
     start = timeit.default_timer()
     out = splitSamples(data)
     trainData = out[0]
@@ -39,10 +41,7 @@ def main():
         print("Training time for k=",k,": ",timeit.default_timer()-start)
     
         start = timeit.default_timer()
-        for i in range(len(testData)):
-            if not i%250-1:
-                print("Classifying observation number: ",i)
-            tables[k].addObs(testClasses[i],neigh.predict([testData[i]])[0])
+        createTable(tables[k],neigh,testData,testClasses)
     
         print(str(tables[k]))
         print("Predicting time for k=", k,": ",timeit.default_timer()-start)

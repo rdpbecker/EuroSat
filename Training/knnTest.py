@@ -12,6 +12,9 @@ testData = fileio.readCsv('../Data/Testing/test_numeric.csv')
 testOriginal = fileio.readCsv('../Data/Testing/test.csv')
 print("Reading time: ", timeit.default_timer()-start)
 
+#data = dataManip.deleteL(data)
+#testData = dataManip.deleteL(testData)
+
 ids = dataManip.firstColVector(testOriginal)
 ids = ids[1:]
 
@@ -32,4 +35,4 @@ for i in range(len(testData)):
     output.append([ids[i],neigh.predict([data[i]])[0]])
 
 print("Predicting time: ",timeit.default_timer()-start)
-fileio.writeCsv("../Output/knn_30.csv",output)
+fileio.writeCsv("../Output/knn_30_numeric.csv",output)
