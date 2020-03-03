@@ -2,6 +2,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import CategoricalNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
+from sklearn.preprocessing import scale
 import sys
 sys.path.append("../Classes")
 sys.path.append("../DataProcessing")
@@ -131,6 +132,8 @@ def main(method,suffix):
     print("Reading time: ", timeit.default_timer()-start)
 
     headers = data[0]
+    if method == "knn":
+        data = scale(data)
     data = data[1:]
     data = deleteNCols(data,1)
     
