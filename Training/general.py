@@ -13,6 +13,7 @@ from Table import Table
 import timeit
 import matplotlib.pyplot as plt
 import clfHelpers as helpers
+import json
 
 ks = {\
 'knn': [1,2,3,4,6,8,10,15,20,30,40,50,75,100,200,400,700,1000],\
@@ -128,12 +129,17 @@ def main(method,suffix):
     nerf = True
     if method == "knn":
         nerf = False
-    data = readCsv('../Data/Training/train_processed.csv',nerf=nerf)
+    with open("selectHeaders.json",'r') as f:
+        select = json.load(f)
+    select.append('satisfied')
+    data = readCsv(\
+        '../Data/Training/train_numeric.csv',\
+        nerf=nerf\
+    )
+    data = selectCols(data,select)
     print("Reading time: ", timeit.default_timer()-start)
 
     headers = data[0]
-    if method == "knn":
-        data = scale(data)
     data = data[1:]
     data = deleteNCols(data,1)
     
@@ -150,6 +156,10 @@ def main(method,suffix):
     testData = out[0]
     testClasses = firstColVector(out[1])
     print("Separation time: ", timeit.default_timer()-start)
+
+    if method == "knn":
+        trainData = scale(trainData)
+        testData = scale(testData)
     
     params = ks[method]
     tables = {}

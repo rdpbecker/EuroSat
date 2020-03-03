@@ -1,4 +1,5 @@
 import random
+import pandas as pd
 
 ###############################################################
 ## Remove the first row of an array (list of lists)
@@ -73,4 +74,12 @@ def splitSamples(data):
     cutoff = int(0.2*length*random.random()+0.74*length)
     return [data[:cutoff],data[cutoff:]]
 
+def dropCols(data,headers):
+    columns = data[0]
+    df = pd.DataFrame(data[1:],columns=columns)
+    df = df.drop(headers,1)
+    return [df.columns.values.tolist()] + df.values.tolist()
 
+def selectCols(data,headers):
+    toDrop = list(set(data[0])-set(headers))
+    return dropCols(data,toDrop)
