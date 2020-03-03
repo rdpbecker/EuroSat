@@ -109,7 +109,7 @@ def validateMethod(method):
 
 def setupClf(method,param):
     if method == 'knn':
-        return KNeighbors(n_neighs=param)
+        return KNeighborsClassifier(n_neighbors=param)
     elif method == 'bayes':
         return CategoricalNB(alpha=param)
     elif method == 'forest':
@@ -124,7 +124,10 @@ def setupClf(method,param):
 
 def main(method,suffix):
     start = timeit.default_timer()
-    data = readCsv('../Data/Training/train_processed.csv',nerf=True)
+    nerf = True
+    if method == "knn":
+        nerf = False
+    data = readCsv('../Data/Training/train_processed.csv',nerf=nerf)
     print("Reading time: ", timeit.default_timer()-start)
 
     headers = data[0]
