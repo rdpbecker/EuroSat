@@ -41,10 +41,11 @@ def setupParam(method,string):
     elif method == 'knn':
         return int(string)
     else:
-        start = tuple(map(float,string.split(',')))
-        for i in range(3):
+        start = string.split(',')
+        for i in range(4):
             start[i] = int(start[i])
-        return start
+        print(start)
+        return tuple(start)
 
 def main(method,param,filename,dataFile):
     start = timeit.default_timer()
@@ -99,7 +100,7 @@ def main(method,param,filename,dataFile):
 
     
     print("Predicting time: ",timeit.default_timer()-start)
-    writeCsv("../../Output/"+filename+".csv",output)
+    writeCsv("../Output/"+filename+".csv",output)
     
 if __name__ == "__main__":
     length = len(sys.argv)
