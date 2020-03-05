@@ -93,7 +93,7 @@ def main(method,param,filename,dataFile):
     clf.fit(data,classes)
     print("Training time: ",timeit.default_timer()-start)
 
-    output = []
+    output = [["ids","Prediction"]]
     start = timeit.default_timer()
     for i in range(len(testData)):
         output.append([ids[i],clf.predict([data[i]])[0]])
