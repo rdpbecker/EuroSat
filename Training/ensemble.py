@@ -132,14 +132,18 @@ def main(methods,params):
 
         print(str(table))
         print("Predicting time",methods[i],": ",timeit.default_timer()-start)
+        writeCsv(methods[i]+str(params[i])+".csv",arr)
 
     voters = Voters.Voters()
     table = Table()
     for arr in arrs:
         voters.addVoter(arr)
+    arr = [['ids','Predicted']]
     for i in range(len(testIds)):
         table.addObs(testClasses[i],voters.vote(testIds[i]))
+        arr.append([testIds[i],voters.vote(testIds[i])])
     print(str(table))
+    writeCsv("ensembletest.csv",arr)
     writeFile("../../Output/ensemble/"+methods[0]+"_"+str(params[0]),str(table))
     
 if __name__ == "__main__":

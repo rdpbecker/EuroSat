@@ -74,6 +74,17 @@ def splitSamples(data):
     cutoff = int(0.2*length*random.random()+0.74*length)
     return [data[:cutoff],data[cutoff:]]
 
+def selectObsById(data,ids):
+    out = [[],[]]
+    for i in range(len(data)):
+        if not i%1000-1:
+            print("Selecting observation",i)
+        if data[i][0] in ids:
+            out[0].append(data[i])
+        else:
+            out[1].append(data[i])
+    return out
+
 def dropCols(data,headers):
     columns = data[0]
     df = pd.DataFrame(data[1:],columns=columns)
