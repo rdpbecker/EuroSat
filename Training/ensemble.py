@@ -15,6 +15,9 @@ import matplotlib.pyplot as plt
 import clfHelpers as helpers
 import json
 import Voters
+import numpy as np
+
+dataChoice = {'bayes': 0, 'forest': 0, 'knn': 1, 'svm': 1}
 
 def validateMethod(method):
     if not method in ['knn','bayes','forest','svm']:
@@ -51,47 +54,73 @@ def setupParam(method,string):
 
 def main(methods,params):
     start = timeit.default_timer()
-    nerf = True
-    if method in ["knn","svm"]:
-        nerf = False
     with open("selectHeaders.json",'r') as f:
         select = json.load(f)
     select.append('satisfied')
-    data = readCsv(\
-        '../Data/Training/train_numeric.csv',\
-        nerf=nerf\
-    )
-    data = selectCols(data,select)
+    data = [\
+        readCsv(\
+            '../Data/Training/train_numeric.csv',\
+            nerf=True\
+        ),\
+        readCsv(\
+            '../Data/Training/train_numeric.csv',\
+            nerf=False\
+        )\
+    ]
     print("Reading time: ", timeit.default_timer()-start)
 
-    headers = data[0]
-    data = data[1:]
+    for i in range(2):
+        data[i] = selectCols(data[i],select)
+        headers = data[i][0]
+        data[i] = data[i][1:]
+
+    # Scale data[1] together, but don't scale the ids or the
+    # classes
+    col1 = [data[1][i][0] for i in range(len(data[1]))]
+    classes = [data[1][i][-1] for i in range(len(data[1]))]
+    data[1] = [data[1][i][1:-1] for i in range(len(data[1]))]
+    data[1] = scale(data[1])
+    data[1] = data[1].tolist()
+    for i in range(len(data[1])):
+        data[1][i].insert(0,col1[i])
+        data[1][i].append(classes[i])
     
     start = timeit.default_timer()
-    out = splitSamples(data)
-    trainData = out[0]
-    testData = out[1]
-    
-    out = separateCol(trainData,-1)
-    trainData = out[0]
-    trainData = deleteNCols(trainData,1)
-    trainClasses = firstColVector(out[1])
-    
-    out = separateCol(testData,-1)
-    testData = out[0]
-    testIds = [testData[i][0] for i in range(len(testData))]
-    testData = deleteNCols(testData,1)
-    testClasses = firstColVector(out[1])
-    print("Separation time: ", timeit.default_timer()-start)
+    splitout = [[],[]]
+    splitout[0] = splitSamples(data[0])
+    ids = [splitout[0][0][i][0] for i in range(len(splitout[0][0]))]
+    splitout[1] = selectObsById(data[1],ids)
+    trainDatas = [[],[]]
+    testDatas = [[],[]]
+    trainClasseses = [[],[]]
+    testClasseses = [[],[]]
+    for i in range(2):
+        trainDatas[i] = splitout[i][0]
+        testDatas[i] = splitout[i][1]
+        
+        out = separateCol(trainDatas[i],-1)
+        trainDatas[i] = out[0]
+        trainDatas[i] = deleteNCols(trainDatas[i],1)
+        trainClasseses[i] = firstColVector(out[1])
+        
+        out = separateCol(testDatas[i],-1)
+        testDatas[i] = out[0]
+        testIds = [testDatas[i][j][0] for j in range(len(testDatas[i]))]
+        testDatas[i] = deleteNCols(testDatas[i],1)
+        testClasseses[i] = firstColVector(out[1])
+        print("Separation time: ", timeit.default_timer()-start)
 
-    if method in ["knn","svm"]:
-        trainData = scale(trainData)
-        testData = scale(testData)
-    
     arrs = []
     for i in range(len(methods)):
+        print('Starting method', methods[i])
         table = Table()
         arr = [["ids","Predicted"]]
+        # Choose data
+        trainData = trainDatas[dataChoice[methods[i]]]
+        testData = testDatas[dataChoice[methods[i]]]
+        trainClasses = trainClasseses[dataChoice[methods[i]]]
+        testClasses = testClasseses[dataChoice[methods[i]]]
+
         start = timeit.default_timer()
         clf = setupClf(methods[i],params[i])
         clf.fit(trainData,trainClasses)
