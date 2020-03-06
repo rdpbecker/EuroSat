@@ -14,6 +14,7 @@ import timeit
 import matplotlib.pyplot as plt
 import clfHelpers as helpers
 import json
+import Voters
 
 def validateMethod(method):
     if not method in ['knn','bayes','forest','svm']:
@@ -42,8 +43,9 @@ def setupParam(method,string):
         return int(string)
     else:
         start = string.split(',')
-        for i in range(4):
+        for i in range(3):
             start[i] = int(start[i])
+        start[3] = float(start[3])
         print(start)
         return tuple(start)
 
@@ -64,7 +66,6 @@ def main(methods,params):
 
     headers = data[0]
     data = data[1:]
-    data = deleteNCols(data,1)
     
     start = timeit.default_timer()
     out = splitSamples(data)
@@ -73,10 +74,13 @@ def main(methods,params):
     
     out = separateCol(trainData,-1)
     trainData = out[0]
+    trainData = deleteNCols(trainData,1)
     trainClasses = firstColVector(out[1])
     
     out = separateCol(testData,-1)
     testData = out[0]
+    testIds = [testData[i][0] for i in range(len(testData))]
+    testData = deleteNCols(testData,1)
     testClasses = firstColVector(out[1])
     print("Separation time: ", timeit.default_timer()-start)
 
@@ -84,19 +88,30 @@ def main(methods,params):
         trainData = scale(trainData)
         testData = scale(testData)
     
-    table = Table()
+    arrs = []
     for i in range(len(methods)):
+        table = Table()
+        arr = [["ids","Predicted"]]
         start = timeit.default_timer()
         clf = setupClf(methods[i],params[i])
         clf.fit(trainData,trainClasses)
-        print("Training time: ",timeit.default_timer()-start)
+        print("Training time",methods[i],": ",timeit.default_timer()-start)
 
         start = timeit.default_timer()
-        helpers.createTable(table,clf,testData,testClasses)
+        helpers.createTableWithArr(table,arr,clf,testData,testClasses,testIds)
+        arrs.append(arr)
 
+        print(str(table))
+        print("Predicting time",methods[i],": ",timeit.default_timer()-start)
+
+    voters = Voters.Voters()
+    table = Table()
+    for arr in arrs:
+        voters.addVoter(arr)
+    for i in range(len(testIds)):
+        table.addObs(testClasses[i],voters.vote(testIds[i]))
     print(str(table))
-    print("Predicting time: ",timeit.default_timer()-start)
-    writeFile("../../Output/ensemble/"+methods[0]+"_"+str(param),str(table))
+    writeFile("../../Output/ensemble/"+methods[0]+"_"+str(params[0]),str(table))
     
 if __name__ == "__main__":
     length = len(sys.argv)
@@ -105,9 +120,9 @@ if __name__ == "__main__":
     methods = []
     params = []
     for i in range(int(length/2)):
-        method = sys.argv[1]
+        method = sys.argv[2*i+1]
         validateMethod(method)
-        param = setupParam(method,sys.argv[2])
+        param = setupParam(method,sys.argv[2*i+2])
         methods.append(method)
         params.append(param)
     main(methods,params)
